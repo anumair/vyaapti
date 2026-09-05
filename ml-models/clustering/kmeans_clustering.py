@@ -35,47 +35,45 @@ def log(message, level="INFO"):
     print(f"[{timestamp}] {icon} {message}", flush=True)
     sys.stdout.flush()
 
-# Load environment variables from root directory
-env_path = os.path.join(os.path.dirname(__file__), '..', '..', '.env')
+# Load environment variables from backend/.env
+env_path = os.path.join(os.path.dirname(__file__), '..', '..', 'backend', '.env')
 load_dotenv(env_path)
 
 # Database connection
 def connect_to_astra():
     """Connect to DataStax Astra DB"""
     log("Connecting to DataStax Astra DB...", "PROCESS")
-    
-    bundle_path = os.getenv('ASTRA_DB_SECURE_BUNDLE_PATH')
-    client_id = os.getenv('ASTRA_DB_CLIENT_ID')
-    client_secret = os.getenv('ASTRA_DB_CLIENT_SECRET')
-    
+
+    bundle_path = os.getenv('ASTRA_SECURE_BUNDLE_PATH', 'secure-connect-vyaapti.zip')
+    client_id = os.getenv('ASTRA_CLIENT_ID')
+    client_secret = os.getenv('ASTRA_CLIENT_SECRET')
+
     # Validate environment variables
-    if not bundle_path:
-        raise ValueError("ASTRA_DB_SECURE_BUNDLE_PATH not found in environment variables")
     if not client_id:
-        raise ValueError("ASTRA_DB_CLIENT_ID not found in environment variables")
+        raise ValueError("ASTRA_CLIENT_ID not found in environment variables (backend/.env)")
     if not client_secret:
-        raise ValueError("ASTRA_DB_CLIENT_SECRET not found in environment variables")
-    
+        raise ValueError("ASTRA_CLIENT_SECRET not found in environment variables (backend/.env)")
+
     # If relative path, look in backend directory
     if not os.path.isabs(bundle_path):
         bundle_path = os.path.join(os.path.dirname(__file__), '..', '..', 'backend', bundle_path)
-    
+
     if not os.path.exists(bundle_path):
         raise FileNotFoundError(f"Secure bundle not found at: {bundle_path}")
-    
+
     log(f"Using bundle: {bundle_path}", "INFO")
-    
+
     cloud_config = {
         'secure_connect_bundle': bundle_path
     }
-    
+
     auth_provider = PlainTextAuthProvider(client_id, client_secret)
-    
+
     cluster = Cluster(cloud=cloud_config, auth_provider=auth_provider)
     session = cluster.connect()
-    
+
     # Set keyspace
-    keyspace = os.getenv('ASTRA_DB_KEYSPACE', 'vyaapti')
+    keyspace = os.getenv('ASTRA_KEYSPACE', 'vyaapti')
     session.set_keyspace(keyspace)
     
     log(f"Connected to keyspace: {keyspace}", "SUCCESS")

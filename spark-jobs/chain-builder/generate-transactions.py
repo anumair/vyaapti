@@ -10,15 +10,22 @@ from datetime import datetime, timedelta
 import random
 import uuid
 import os
+from dotenv import load_dotenv
 
 # ============================================
 # CONFIGURATION
 # ============================================
 
-ASTRA_CLIENT_ID = "grpXrlZBvKEgKIHnqqIFzhmK"
-ASTRA_CLIENT_SECRET = "MCgvzCnQYFl+X+fR8WIDeZNzIoKox+8HBkNwRB8H26P8PcQAL3Xi0HJ-mXsEHE18-.133_UJxdvWTlF9l5d1UTZoXDvw4k-bYxbLxJ2Z7BDu3hO0tysaGJZP98UzM+m."
-ASTRA_SECURE_BUNDLE = "../../backend/secure-connect-vyaapti.zip"
-KEYSPACE = "vyaapti"
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+load_dotenv(os.path.join(BASE_DIR, "backend", ".env"))
+
+ASTRA_CLIENT_ID = os.getenv("ASTRA_CLIENT_ID")
+ASTRA_CLIENT_SECRET = os.getenv("ASTRA_CLIENT_SECRET")
+ASTRA_SECURE_BUNDLE = os.path.join(BASE_DIR, "backend", os.getenv("ASTRA_SECURE_BUNDLE_PATH", "secure-connect-vyaapti.zip"))
+KEYSPACE = os.getenv("ASTRA_KEYSPACE", "vyaapti")
+
+if not ASTRA_CLIENT_ID or not ASTRA_CLIENT_SECRET:
+    raise RuntimeError("ASTRA_CLIENT_ID / ASTRA_CLIENT_SECRET not set. Fill in backend/.env (see backend/.env.example).")
 
 NUM_TRANSACTIONS = 10000
 NUM_ACCOUNTS = 200

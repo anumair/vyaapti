@@ -7,11 +7,13 @@
 -- Region: asia-south1
 -- ============================================
 
--- IMPORTANT: Create keyspace through Astra Dashboard first
--- Dashboard → Database → CQL Console → Run below command:
--- CREATE KEYSPACE IF NOT EXISTS rtgs_risk WITH replication = {'class': 'NetworkTopologyStrategy', 'asia-south1': 3};
+-- IMPORTANT: Create keyspace through Astra Dashboard first (or during DB creation).
+-- The app (backend/config/database.js, ml-models scripts) connects to keyspace "vyaapti"
+-- by default (override with ASTRA_KEYSPACE in backend/.env if you name it differently).
+-- Dashboard → Database → CQL Console → Run below command if creating manually:
+-- CREATE KEYSPACE IF NOT EXISTS vyaapti WITH replication = {'class': 'NetworkTopologyStrategy', 'asia-south1': 3};
 
-USE rtgs_risk;
+USE vyaapti;
 
 -- ============================================
 -- CHAINS TABLE
@@ -171,11 +173,12 @@ INSERT INTO accounts (account_id, cluster_label, mean_amount, frequency, suspici
 VALUES ('ACC010', 2, 4700000, 50, 81.9, 0.76, 0.70, toTimestamp(now()), toTimestamp(now()));
 
 -- Link accounts to chains (sample data)
-INSERT INTO account_chains (account_id, chain_id, role, position) 
-SELECT 'ACC001', chain_id, 'originator', 0 FROM chains WHERE accounts CONTAINS 'ACC001' LIMIT 1;
-
-INSERT INTO account_chains (account_id, chain_id, role, position) 
-SELECT 'ACC002', chain_id, 'intermediary', 1 FROM chains WHERE accounts CONTAINS 'ACC002' LIMIT 1;
+-- NOTE: CQL has no INSERT...SELECT (that's SQL-only syntax, not valid CQL).
+-- To link a sample account to a chain, first look up the chain_id, then insert with the literal value:
+--   SELECT chain_id FROM chains WHERE accounts CONTAINS 'ACC001' LIMIT 1 ALLOW FILTERING;
+--   INSERT INTO account_chains (account_id, chain_id, role, position) VALUES ('ACC001', <chain_id-from-above>, 'originator', 0);
+-- In normal operation this table is populated automatically by the Spark chain-detection job
+-- (spark-jobs/chain-builder/detect_chains_astra.py), which writes it via a Spark DataFrame, not raw CQL.
 
 -- ============================================
 -- VERIFICATION QUERIES

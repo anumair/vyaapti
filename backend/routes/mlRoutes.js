@@ -18,25 +18,25 @@ const client = require('../config/database');
 
 function runPythonScript(scriptPath) {
     return new Promise((resolve, reject) => {
-        // Load environment variables from root .env file
+        // Load environment variables from backend/.env
         require('dotenv').config({ path: path.join(__dirname, '../.env') });
-        
+
         // Pass environment variables to Python
         const env = {
             ...process.env,
             PYTHONIOENCODING: 'utf-8',
             // Ensure these are set
-            ASTRA_DB_CLIENT_ID: process.env.ASTRA_DB_CLIENT_ID,
-            ASTRA_DB_CLIENT_SECRET: process.env.ASTRA_DB_CLIENT_SECRET,
-            ASTRA_DB_KEYSPACE: process.env.ASTRA_DB_KEYSPACE,
-            ASTRA_DB_SECURE_BUNDLE_PATH: process.env.ASTRA_DB_SECURE_BUNDLE_PATH
+            ASTRA_CLIENT_ID: process.env.ASTRA_CLIENT_ID,
+            ASTRA_CLIENT_SECRET: process.env.ASTRA_CLIENT_SECRET,
+            ASTRA_KEYSPACE: process.env.ASTRA_KEYSPACE,
+            ASTRA_SECURE_BUNDLE_PATH: process.env.ASTRA_SECURE_BUNDLE_PATH
         };
-        
+
         console.log('Environment check:', {
-            hasClientId: !!env.ASTRA_DB_CLIENT_ID,
-            hasClientSecret: !!env.ASTRA_DB_CLIENT_SECRET,
-            hasKeyspace: !!env.ASTRA_DB_KEYSPACE,
-            hasBundlePath: !!env.ASTRA_DB_SECURE_BUNDLE_PATH
+            hasClientId: !!env.ASTRA_CLIENT_ID,
+            hasClientSecret: !!env.ASTRA_CLIENT_SECRET,
+            hasKeyspace: !!env.ASTRA_KEYSPACE,
+            hasBundlePath: !!env.ASTRA_SECURE_BUNDLE_PATH
         });
         
         // Use 'python' instead of 'python3' for Windows

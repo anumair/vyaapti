@@ -8,15 +8,19 @@ console.log('╔═════════════════════�
 console.log('║  DataStax Astra DB Connection Test        ║');
 console.log('╚════════════════════════════════════════════╝\n');
 
+const KEYSPACE = process.env.ASTRA_KEYSPACE || 'vyaapti';
+
 const client = new cassandra.Client({
     cloud: {
-        secureConnectBundle: path.join(__dirname, 'secure-connect-vyaapti.zip')
+        secureConnectBundle: process.env.ASTRA_SECURE_BUNDLE_PATH
+            ? path.resolve(__dirname, process.env.ASTRA_SECURE_BUNDLE_PATH)
+            : path.join(__dirname, 'secure-connect-vyaapti.zip')
     },
     credentials: {
         username: process.env.ASTRA_CLIENT_ID,
         password: process.env.ASTRA_CLIENT_SECRET
     },
-    keyspace: 'vyaapti'
+    keyspace: KEYSPACE
 });
 
 async function testConnection() {
@@ -24,7 +28,7 @@ async function testConnection() {
         console.log('🔌 Attempting to connect to Astra DB...');
         console.log(`   Database: vyaapti`);
         console.log(`   Region: Mumbai (asia-south1)`);
-        console.log(`   Keyspace: vyaapti\n`);
+        console.log(`   Keyspace: ${KEYSPACE}\n`);
 
         await client.connect();
         console.log('✓ Successfully connected to Astra DB!\n');
@@ -97,7 +101,7 @@ async function testConnection() {
             console.error('❌ Keyspace not found!');
             console.error('   Solution:');
             console.error('   1. Go to Astra CQL Console');
-            console.error('   2. Run: CREATE KEYSPACE rtgs_risk WITH replication = {\'class\': \'NetworkTopologyStrategy\', \'asia-south1\': 3};\n');
+            console.error(`   2. Run: CREATE KEYSPACE ${KEYSPACE} WITH replication = {'class': 'NetworkTopologyStrategy', 'asia-south1': 3};\n`);
         } else if (error.message.includes('Unavailable')) {
             console.error('❌ Table not found!');
             console.error('   Solution:');

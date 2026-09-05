@@ -12,15 +12,22 @@ import networkx as nx
 import uuid
 import os
 import builtins
+from dotenv import load_dotenv
 
 # ==========================================================
 # CONFIGURATION
 # ==========================================================
 
-ASTRA_CLIENT_ID = "YOUR_ASTRA_CLIENT_ID"
-ASTRA_CLIENT_SECRET = "YOUR_ASTRA_CLIENT_SECRET"
-ASTRA_SECURE_BUNDLE = "../../backend/secure-connect-vyaapti.zip"
-KEYSPACE = "vyaapti"
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+load_dotenv(os.path.join(BASE_DIR, "backend", ".env"))
+
+ASTRA_CLIENT_ID = os.getenv("ASTRA_CLIENT_ID")
+ASTRA_CLIENT_SECRET = os.getenv("ASTRA_CLIENT_SECRET")
+ASTRA_SECURE_BUNDLE = os.path.join(BASE_DIR, "backend", os.getenv("ASTRA_SECURE_BUNDLE_PATH", "secure-connect-vyaapti.zip"))
+KEYSPACE = os.getenv("ASTRA_KEYSPACE", "vyaapti")
+
+if not ASTRA_CLIENT_ID or not ASTRA_CLIENT_SECRET:
+    raise RuntimeError("ASTRA_CLIENT_ID / ASTRA_CLIENT_SECRET not set. Fill in backend/.env (see backend/.env.example).")
 
 MIN_HOPS = 2
 MAX_HOPS = 4
